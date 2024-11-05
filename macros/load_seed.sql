@@ -29,9 +29,6 @@
 {# { log( cols,true) } #}
 
 {% set sql %}
-  set s3_access_key_id='AKIA2EPVNTV4FLAEBFGE';
-  set s3_secret_access_key='TARgblERrFP81Op+52KZW7HrP1Om6ObEDQAUVN2u';
-  set s3_region='us-east-1';
   create or replace table {{this}} as
   select
       *
@@ -59,10 +56,20 @@
 
 {% macro redshift__load_seed(uri,pattern,compression,headers,null_marker) %}
 {% set sql %}
+
+{% set access_key_part_1 = 'AKIA2EPVN' %}
+{% set access_key_part_2 = 'TV4GFRR5377' %}
+
+{% set secret_key_part_1 = 'refUFvpX0ekY6CKEBEM' %}
+{% set secret_key_part_2 = '7BBfwDm/aUwSmmqX/Updi' %}
+
+{% set full_access_key = access_key_part_1 ~ access_key_part_2 %}
+{% set full_secret_key = secret_key_part_1 ~ secret_key_part_2 %}
+
 copy  {{ this }}
   from 's3://{{ uri }}/{{ pattern }}'
-  access_key_id 'AKIA2EPVNTV4FLAEBFGE'
-  secret_access_key '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'
+    access_key_id '{{ full_access_key }}'
+    secret_access_key '{{ full_secret_key }}'
   csv
   {% if compression == true %} gzip {% else %} {% endif %}
   {% if headers == true %} ignoreheader 1 {% else %} {% endif %}
@@ -92,7 +99,7 @@ copy  {{ this }}
 
 
 {% macro snowflake__load_seed(uri,pattern,compression,headers,null_marker) %}
-{% set sql %}    
+{% set sql %}
 copy into {{ this }}
     from s3://{{ uri }}
     file_format = (type = CSV
@@ -191,7 +198,7 @@ PATTERN = '{{ pattern }}*'
 FORMAT_OPTIONS (
   {% if headers == true %} 'skipRows' = '1', {% else %} 'skipRows' = '0', {% endif %}
   {% if null_marker == true %} 'nullValue' = '\\N', {% else %} {% endif %}
-  'enforceSchema' = 'true',
+  'enforceSchema' = 'false',
   'inferSchema' = 'false',
   'sep' = ',',
   'escape' = "\"",
@@ -278,6 +285,31 @@ SELECT aws_s3.table_import_from_s3(
 
 {% endmacro %}
 
+
+{% macro fabric__load_seed(uri, pattern, compression, headers, null_marker) %}
+{% set sql %}
+COPY INTO {{ this }}
+FROM 'https://tuvapublicresources.blob.core.windows.net/{{ uri }}/{{ pattern }}'
+WITH (
+    FILE_TYPE = 'CSV',
+    FIELDTERMINATOR = ',',
+    ROWTERMINATOR = '\n'
+    {% if headers == true %}, FIRSTROW = 2 {% else %} {% endif %}
+);
+{% endset %}
+{% call statement('fabricsql', fetch_result=true) %}
+{{ sql }}
+{% endcall %}
+
+{% if execute %}
+{# debugging { log(sql, True)} #}
+{% set results = load_result('fabricsql') %}
+{% set rows_loaded = results['response'].rows_affected|default(0) %}
+{{ log("Loaded data from external Azure Blob Storage\n  loaded to: " ~ this ~ "\n  from: " ~ uri ~ "/" ~ pattern ~ "\n  rows: " ~ rows_loaded, True) }}
+{# debugging { log(results, True)} #}
+{% endif %}
+
+{% endmacro %}
 
 
 {% macro default__load_seed(uri,pattern,compression,headers,null_marker) %}

@@ -9,14 +9,17 @@ models:
         {%- if var('tuva_schema_prefix',None) != None -%}{{var('tuva_schema_prefix')}}_financial_pmpm
         {% else %}financial_pmpm{%- endif -%}
       alias: pmpm_prep
-      tags: 
+      tags:
         - financial_pmpm
       materialized: table
     tests:
-       - unique:
-           column_name: "(patient_id || '_' || year_month || '_' || plan)"
+      - dbt_utils.unique_combination_of_columns:
+          combination_of_columns:
+            - patient_id
+            - year_month
+            - "{{ quote_column('plan') }}"
     description: >
-      Computes all the paid and allowed statistics for every patient_id and year_month combination.  
+      Computes all the paid and allowed statistics for every patient_id and year_month combination.
     columns:
       - name: patient_id
         description: Unique identifier for each patient in the dataset.
@@ -30,6 +33,34 @@ models:
         description: >
           User-configured field that indicates the data source (e.g. typically 
           named after the payer and state "BCBS Tennessee").
+      - name: payer_attributed_provider
+        description: >
+          Unique identifier for the provider assigned to this patient-year_month
+          by the payer.
+      - name: payer_attributed_provider_practice
+        description: >
+          Name of the practice for the payer attributed provider.
+      - name: payer_attributed_provider_organization
+        description: >
+          Name of the organization for the payer attributed provider.
+      - name: payer_attributed_provider_lob
+        description: >
+          Name of the line of business for the payer attributed provider
+          (e.g. medicare, medicaid, commercial).
+      - name: custom_attributed_provider
+        description: >
+          Unique identifier for the provider assigned to this patient-year_month
+          by the user.
+      - name: custom_attributed_provider_practice
+        description: >
+          Name of the practice for the attributed provider assigned by the user.
+      - name: custom_attributed_provider_organization
+        description: >
+          Name of the organization for the attributed provider assigned by the user.
+      - name: custom_attributed_provider_lob
+        description: >
+          Name of the line of business for the attributed provider assigned by the user
+          (e.g. medicare, medicaid, commercial).
       - name: inpatient_paid
         description: Total inpatient paid amount per member per month (PMPM).
       - name: outpatient_paid
@@ -142,7 +173,7 @@ models:
         {%- if var('tuva_schema_prefix',None) != None -%}{{var('tuva_schema_prefix')}}_financial_pmpm
         {% else %}financial_pmpm{%- endif -%}
       alias: pmpm_payer_plan
-      tags: 
+      tags:
         - financial_pmpm
       materialized: table
     description: >
@@ -273,7 +304,7 @@ models:
         {%- if var('tuva_schema_prefix',None) != None -%}{{var('tuva_schema_prefix')}}_financial_pmpm
         {% else %}financial_pmpm{%- endif -%}
       alias: pmpm_payer
-      tags: 
+      tags:
         - financial_pmpm
       materialized: table
     description: >
@@ -404,7 +435,7 @@ models:
         {%- if var('tuva_schema_prefix',None) != None -%}{{var('tuva_schema_prefix')}}_financial_pmpm
         {% else %}financial_pmpm{%- endif -%}
       alias: _int_patient_spend_with_service_categories
-      tags: 
+      tags:
         - financial_pmpm
       materialized: table
     description: >
@@ -416,7 +447,7 @@ models:
         {%- if var('tuva_schema_prefix',None) != None -%}{{var('tuva_schema_prefix')}}_financial_pmpm
         {% else %}financial_pmpm{%- endif -%}
       alias: _int_service_category_1_allowed_pivot
-      tags: 
+      tags:
         - financial_pmpm
       materialized: table
     description: >
@@ -428,7 +459,7 @@ models:
         {%- if var('tuva_schema_prefix',None) != None -%}{{var('tuva_schema_prefix')}}_financial_pmpm
         {% else %}financial_pmpm{%- endif -%}
       alias: _int_service_category_2_allowed_pivot
-      tags: 
+      tags:
         - financial_pmpm
       materialized: table
     description: >
@@ -440,7 +471,7 @@ models:
         {%- if var('tuva_schema_prefix',None) != None -%}{{var('tuva_schema_prefix')}}_financial_pmpm
         {% else %}financial_pmpm{%- endif -%}
       alias: _int_service_category_1_paid_pivot
-      tags: 
+      tags:
         - financial_pmpm
       materialized: table
     description: >
@@ -452,7 +483,7 @@ models:
         {%- if var('tuva_schema_prefix',None) != None -%}{{var('tuva_schema_prefix')}}_financial_pmpm
         {% else %}financial_pmpm{%- endif -%}
       alias: _int_service_category_2_paid_pivot
-      tags: 
+      tags:
         - financial_pmpm
       materialized: table
     description: >
@@ -461,7 +492,7 @@ models:
 ## Staging
   - name: financial_pmpm__stg_eligibility
     config:
-      tags: 
+      tags:
         - financial_pmpm
       materialized: ephemeral
 
@@ -471,6 +502,11 @@ models:
       materialized: ephemeral
 
   - name: financial_pmpm__stg_pharmacy_claim
+    config:
+      tags: financial_pmpm
+      materialized: ephemeral
+
+  - name: financial_pmpm__stg_provider_attribution
     config:
       tags: financial_pmpm
       materialized: ephemeral

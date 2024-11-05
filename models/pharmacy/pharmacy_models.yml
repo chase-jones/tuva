@@ -8,7 +8,7 @@ models:
       schema: |
         {%- if var('tuva_schema_prefix', None) != None -%}
           {{var('tuva_schema_prefix')}}_pharmacy
-        {% else %}
+        {%- else -%}
           pharmacy
         {%- endif -%}
       alias: brand_generic_opportunity
@@ -63,7 +63,7 @@ models:
       schema: |
         {%- if var('tuva_schema_prefix', None) != None -%}
           {{var('tuva_schema_prefix')}}_pharmacy
-        {% else %}
+        {%- else -%}
           pharmacy
         {%- endif -%}
       alias: generic_available_list
@@ -110,13 +110,12 @@ models:
           `dbt_utils.pretty_time` as the local time of the `dbt run` 
           environment.  Timezone is configurable via the `tuva_last_run` var.
 
-
   - name: pharmacy__pharmacy_claim_expanded
     config:
       schema: |
         {%- if var('tuva_schema_prefix', None) != None -%}
           {{var('tuva_schema_prefix')}}_pharmacy
-        {% else %}
+        {%- else -%}
           pharmacy
         {%- endif -%}
       alias: pharmacy_claim_expanded
@@ -142,10 +141,10 @@ models:
         description: Unique identifier for each patient.
       - name: member_id
         description: Unique identifier for each member.
-      - name: prescribing_provider_npi
-        description: NPI of the prescribing provider.
-      - name: dispensing_provider_npi
-        description: NPI of the dispensing provider.
+      - name: prescribing_provider_id
+        description: ID of the prescribing provider.
+      - name: dispensing_provider_id
+        description: ID of the dispensing provider.
       - name: dispensing_date
         description: Date when the drug was dispensed.
       - name: ndc_code
@@ -210,7 +209,7 @@ models:
       schema: |
         {%- if var('tuva_schema_prefix', None) != None -%}
           {{var('tuva_schema_prefix')}}_pharmacy
-        {% else %}
+        {%- else -%}
           pharmacy
         {%- endif -%}
       alias: _int_brand_with_generic_available
@@ -225,7 +224,7 @@ models:
       schema: |
         {%- if var('tuva_schema_prefix', None) != None -%}
           {{var('tuva_schema_prefix')}}_pharmacy
-        {% else %}
+        {%- else -%}
           pharmacy
         {%- endif -%}
       alias: _int_claims_current_cost
@@ -240,7 +239,7 @@ models:
       schema: |
         {%- if var('tuva_schema_prefix', None) != None -%}
           {{var('tuva_schema_prefix')}}_pharmacy
-        {% else %}
+        {%- else -%}
           pharmacy
         {%- endif -%}
       alias: _int_generic_cost
@@ -255,7 +254,7 @@ models:
       schema: |
         {%- if var('tuva_schema_prefix', None) != None -%}
           {{var('tuva_schema_prefix')}}_pharmacy
-        {% else %}
+        {%- else -%}
           pharmacy
         {%- endif -%}
       alias: _int_generic_cost_by_ndc
@@ -272,7 +271,7 @@ models:
       schema: |
         {%- if var('tuva_schema_prefix', None) != None -%}
           {{var('tuva_schema_prefix')}}_pharmacy
-        {% else %}
+        {%- else -%}
           pharmacy
         {%- endif -%}
       alias: stg_pharmacy_claim

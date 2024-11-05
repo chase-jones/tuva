@@ -8,7 +8,7 @@ with service_cat_1 as (
     patient_id
   , year_month
   , payer
-  , plan
+  , {{ quote_column('plan') }}
   , service_category_1
   , data_source
   , sum(total_allowed) as total_allowed
@@ -17,7 +17,7 @@ with service_cat_1 as (
     patient_id
   , year_month
   , payer
-  , plan
+  , {{ quote_column('plan') }}
   , service_category_1
   , data_source
 )
@@ -26,11 +26,11 @@ select
   patient_id
 , year_month
 , payer
-, plan
+, {{ quote_column('plan') }}
 , data_source
 , {{ dbt_utils.pivot(
       column='service_category_1'
-    , values=('Inpatient','Outpatient','Office Visit','Ancillary','Other','Pharmacy')
+    , values=('inpatient','outpatient','office-based','ancillary','other','pharmacy')
     , agg='sum'
     , then_value='total_allowed'
     , else_value= 0
@@ -43,5 +43,5 @@ group by
   patient_id
 , year_month
 , payer
-, plan
+, {{ quote_column('plan') }}
 , data_source

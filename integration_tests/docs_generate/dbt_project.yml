@@ -22,6 +22,7 @@ vars:
   clinical_enabled: true
   claims_enabled: true
   #tuva_marts_enabled: true
+  provider_attribution_enabled: true
 
 
 dispatch:
@@ -36,8 +37,6 @@ macro-paths: ["../macros"]
 snapshot-paths: ["../snapshots"]
 docs-paths: ["docs"]
 
-target-path: "../target"
-log-path: "../logs"
 packages-install-path: "../dbt_packages"
 clean-targets:
   - "../target"
